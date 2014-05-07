@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!-- The COPYRIGHT file at the top level of this repository contains the full
+     copyright notices and license terms. -->
+<tryton>
+    <data>
+        <!-- farm.move.event -->
+        <record model="ir.ui.view" id="farm_move_event_view_form">
+            <field name="model">farm.move.event</field>
+            <field name="inherit" ref="farm.farm_move_event_form_view"/>
+            <field name="name">farm_move_event_form</field>
+        </record>
+
+        <record model="ir.model.access" id="access_move_event_sale">
+            <field name="model" search="[('model', '=', 'farm.move.event')]"/>
+            <field name="group" ref="sale.group_sale"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+
+        <!-- sale.sale -->
+        <record model="ir.ui.view" id="sale_view_form">
+            <field name="model">sale.sale</field>
+            <field name="inherit" ref="sale.sale_view_form"/>
+            <field name="name">sale_form</field>
+        </record>
+
+        <record model="ir.action.act_window" id="act_move_event_form">
+            <field name="name">Animal's Moves</field>
+            <field name="res_model">farm.move.event</field>
+            <field name="domain">[("id", "in", Eval('move_events'))]</field>
+        </record>
+        <record model="ir.action.keyword"
+                id="act_open_move_event_keyword1">
+            <field name="keyword">form_relate</field>
+            <field name="model">sale.sale,-1</field>
+            <field name="action" ref="act_move_event_form"/>
+        </record>
+
+        <record model="ir.model.access" id="access_sale_farm">
+            <field name="model" search="[('model', '=', 'sale.sale')]"/>
+            <field name="group" ref="farm.group_farm"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+
+        <!-- sale.line -->
+        <record model="ir.ui.view" id="sale_line_view_form">
+            <field name="model">sale.line</field>
+            <field name="inherit" ref="sale.sale_line_view_form"/>
+            <field name="name">sale_line_form</field>
+        </record>
+
+        <record model="ir.ui.view" id="sale_line_view_tree">
+            <field name="model">sale.line</field>
+            <field name="inherit" ref="sale.sale_line_view_tree"/>
+            <field name="name">sale_line_tree</field>
+        </record>
+
+        <record model="ir.ui.view" id="sale_line_view_tree_sequence">
+            <field name="model">sale.line</field>
+            <field name="inherit" ref="sale.sale_line_view_tree_sequence"/>
+            <field name="name">sale_line_tree</field>
+        </record>
+
+        <record model="ir.model.access" id="access_sale_line_farm">
+            <field name="model" search="[('model', '=', 'sale.line')]"/>
+            <field name="group" ref="farm.group_farm"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+    </data>
+</tryton>

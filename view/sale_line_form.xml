@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!-- The COPYRIGHT file at the top level of this repository contains the full
+     copyright notices and license terms. -->
+<data>
+    <xpath expr="/form/notebook/page[@id='general']" position="after">
+        <page name="animal">
+            <label name="animal"/>
+            <field name="animal"/>
+            <newline/>
+            <label name="animal_location"/>
+            <field name="animal_location"/>
+            <label name="animal_quantity"/>
+            <field name="animal_quantity"/>
+            <field name="move_events" colspan="4"/>
+        </page>
+    </xpath>
+</data>
