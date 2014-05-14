@@ -54,10 +54,10 @@ class MoveEvent:
                     cls.raise_user_error('weight_required_in_sale_move_event',
                         (event.rec_name,))
                 sales_to_process.add(event.origin.sale.id)
-        super(MoveEvent, cls).validate_event(events)
-        if sales_to_process:
-            with Transaction().set_user(0, set_context=True):
-                Sale.process(Sale.browse(list(sales_to_process)))
+        with Transaction().set_user(0, set_context=True):
+            super(MoveEvent, cls).validate_event(events)
+            if sales_to_process:
+                    Sale.process(Sale.browse(list(sales_to_process)))
 
 
 class Sale:

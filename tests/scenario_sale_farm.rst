@@ -299,6 +299,7 @@ state::
 
     >>> config.user = farm_user.id
     >>> MoveEvent = Model.get('farm.move.event')
+    >>> move_event = MoveEvent(move_event.id)
     >>> move_event.weight = Decimal('2365.0')
     >>> move_event.save()
     >>> MoveEvent.validate_event([move_event.id], config.context)
@@ -309,17 +310,19 @@ state::
     >>> sale.reload()
     >>> sale.shipment_state
     u'sent'
+    >>> invoice, = sale.invoices
 
 
 Post invoice::
 
     >>> config.user = account_user.id
     >>> Invoice = Model.get('account.invoice')
-    >>> Invoice.post([i.id for i in sale.invoices], config.context)
+    >>> invoice = Invoice(invoice.id)
+    >>> Invoice.post([invoice.id], config.context)
     >>> config.user = sale_user.id
     >>> sale.reload()
     >>> len(sale.shipments), len(sale.shipment_returns), len(sale.invoices)
-    (1, 0, 1)
+    (0, 0, 1)
 
 Pay invoice (TODO) and check unit price of Move event and Lot cost price is
 updated::
