@@ -295,8 +295,7 @@ class SaleLine:
             if e.state == 'validated')
         unit_price = invoice_amount / delivered_animals
 
-        category_id = ModelData.get_id('stock_lot_cost',
-            'cost_category_standard_price')
+        category_id = ModelData.get_id('sale_farm', 'cost_category_sale_price')
         lot = self.animal.lot
         for event in self.move_events:
             if event.state != 'validated':

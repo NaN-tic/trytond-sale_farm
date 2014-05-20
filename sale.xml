@@ -2,6 +2,12 @@
 <!-- The COPYRIGHT file at the top level of this repository contains the full
      copyright notices and license terms. -->
 <tryton>
+    <data noupdate="1">
+        <record model="stock.lot.cost_category"
+                id="cost_category_sale_price">
+            <field name="name">Sale Price</field>
+        </record>
+    </data>
     <data>
         <!-- farm.move.event -->
         <record model="ir.ui.view" id="farm_move_event_view_form">
