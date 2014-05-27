@@ -136,8 +136,8 @@ class SaleLine:
             'invisible': Eval('animal_type', '') != 'group',
             'required': Eval('animal_type', '') == 'group',
             }, depends=['animal_type'])
-    move_events = fields.One2Many('farm.move.event', 'origin', 'Move Events',
-        readonly=True)
+    move_events = fields.One2Many('farm.move.event', 'origin',
+        "Animal's Moves", readonly=True)
 
     @classmethod
     def __setup__(cls):

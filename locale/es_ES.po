@@ -1,0 +1,67 @@
+# 
+msgid ""
+msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+msgctxt "error:farm.move.event:"
+msgid ""
+"The weigth in the Move Event \"%s\" is required because it is a move of a "
+"sale."
+msgstr ""
+"El peso en el movimiento \"%s\" es obligatorio ya que se trata de un "
+"movimiento de venta."
+
+msgctxt "field:farm.move.event,origin:"
+msgid "Origin"
+msgstr "Origen"
+
+msgctxt "field:sale.line,animal:"
+msgid "Animal"
+msgstr "Animal"
+
+msgctxt "field:sale.line,animal_location:"
+msgid "Animal Location"
+msgstr "Ubicación animal"
+
+msgctxt "field:sale.line,animal_quantity:"
+msgid "Animal Quantity"
+msgstr "Cantidad animal"
+
+msgctxt "field:sale.line,animal_type:"
+msgid "Animal Type"
+msgstr "Tipo animal"
+
+msgctxt "field:sale.line,move_events:"
+msgid "Animal's Moves"
+msgstr "Movimientos animales"
+
+msgctxt "field:sale.sale,move_events:"
+msgid "Animal's Moves"
+msgstr "Movimientos animales"
+
+msgctxt "model:ir.action,name:act_move_event_form"
+msgid "Animal's Moves"
+msgstr "Movimientos animales"
+
+msgctxt "model:stock.lot.cost_category,name:cost_category_sale_price"
+msgid "Sale Price"
+msgstr "Precio de venta"
+
+msgctxt "selection:sale.line,animal_type:"
+msgid ""
+msgstr ""
+
+msgctxt "selection:sale.line,animal_type:"
+msgid "Female"
+msgstr "Hembra"
+
+msgctxt "selection:sale.line,animal_type:"
+msgid "Group"
+msgstr "Grupo"
+
+msgctxt "selection:sale.line,animal_type:"
+msgid "Individual"
+msgstr "Individuo"
+
+msgctxt "selection:sale.line,animal_type:"
+msgid "Male"
+msgstr "Macho"
