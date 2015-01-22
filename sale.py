@@ -111,16 +111,14 @@ class SaleLine:
                 Not(Eval('context', {}).get('groups', []).contains(
                     Id('farm', 'group_farm')))),
             'readonly': ~Eval('_parent_sale', {}),
-            }, depends=['type'],
-        on_change=['_parent_sale.sale_date', 'type', 'animal',
-            'animal_location', 'animal_quantity'])
+            }, depends=['type'])
     animal_type = fields.Function(fields.Selection([
             (None, ''),
             ('male', 'Male'),
             ('female', 'Female'),
             ('individual', 'Individual'),
             ('group', 'Group'),
-            ], 'Animal Type', on_change_with=['type', 'animal']),
+            ], 'Animal Type'),
         'on_change_with_animal_type')
     animal_location = fields.Many2One('stock.location', 'Animal Location',
         domain=[
@@ -129,9 +127,7 @@ class SaleLine:
             'invisible': ~Bool(Eval('animal_type')),
             'required': Bool(Eval('animal_type')),
             'readonly': Eval('animal_type', '') != 'group',
-            }, depends=['animal_type'],
-        on_change=['_parent_sale.sale_date', 'animal', 'animal_location',
-            'animal_quantity'])
+            }, depends=['animal_type'])
     animal_quantity = fields.Integer('Animal Quantity', states={
             'invisible': Eval('animal_type', '') != 'group',
             'required': Eval('animal_type', '') == 'group',
@@ -143,8 +139,8 @@ class SaleLine:
     def __setup__(cls):
         super(SaleLine, cls).__setup__()
         if hasattr(cls, 'analytic_accounts'):
-            cls.animal.on_change.append('analytic_accounts')
-            cls.animal_location.on_change.append('analytic_accounts')
+            cls.animal.on_change.add('analytic_accounts')
+            cls.animal_location.on_change.add('analytic_accounts')
 
     @classmethod
     def get_animal_models(cls):
@@ -157,6 +153,7 @@ class SaleLine:
                 ])
         return [('', '')] + [(m.model, m.name) for m in models]
 
+    @fields.depends('type', 'animal', '_parent_sale.sale_date')
     def on_change_animal(self):
         Animal = Pool().get('farm.animal')
 
@@ -196,6 +193,7 @@ class SaleLine:
                 res['analytic_account_%s' % account.root.id] = account.id
         return res
 
+    @fields.depends('type', 'animal')
     def on_change_with_animal_type(self, name=None):
         Animal = Pool().get('farm.animal')
         if not self.type or not self.animal or self.animal.id < 0:
@@ -204,6 +202,7 @@ class SaleLine:
             return self.animal.type
         return 'group'
 
+    @fields.depends('animal', 'animal_location', '_parent_sale.sale_date')
     def on_change_animal_location(self):
         if not self.animal or not self.animal_location:
             return {
