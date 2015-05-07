@@ -112,6 +112,7 @@ Create chart of accounts::
 
     >>> AccountTemplate = Model.get('account.account.template')
     >>> Account = Model.get('account.account')
+    >>> Journal = Model.get('account.journal')
     >>> account_template, = AccountTemplate.find([('parent', '=', None)])
     >>> create_chart = Wizard('account.create_chart')
     >>> create_chart.execute('account')
@@ -137,6 +138,15 @@ Create chart of accounts::
     >>> create_chart.form.account_receivable = receivable
     >>> create_chart.form.account_payable = payable
     >>> create_chart.execute('create_properties')
+    >>> cash, = Account.find([
+    ...         ('kind', '=', 'other'),
+    ...         ('name', '=', 'Main Cash'),
+    ...         ('company', '=', company.id),
+    ...         ])
+    >>> cash_journal, = Journal.find([('type', '=', 'cash')])
+    >>> cash_journal.credit_account = cash
+    >>> cash_journal.debit_account = cash
+    >>> cash_journal.save()
 
 Create parties::
 
@@ -279,10 +289,9 @@ Sale 15 animals::
     >>> sale_line.quantity = 2250.0
     >>> sale_line.animal = animal_group
     >>> sale_line.animal_quantity = 15
-    >>> sale.save()
-    >>> Sale.quote([sale.id], config.context)
-    >>> Sale.confirm([sale.id], config.context)
-    >>> Sale.process([sale.id], config.context)
+    >>> sale.click('quote')
+    >>> sale.click('confirm')
+    >>> sale.click('process')
     >>> sale.state
     u'processing'
     >>> sale.reload()
@@ -312,17 +321,31 @@ state::
     u'sent'
     >>> invoice, = sale.invoices
 
-
 Post invoice::
 
     >>> config.user = account_user.id
     >>> Invoice = Model.get('account.invoice')
     >>> invoice = Invoice(invoice.id)
+    >>> invoice.click('post')
     >>> Invoice.post([invoice.id], config.context)
     >>> config.user = sale_user.id
     >>> sale.reload()
     >>> len(sale.shipments), len(sale.shipment_returns), len(sale.invoices)
     (0, 0, 1)
 
-Pay invoice (TODO) and check unit price of Move event and Lot cost price is
-updated::
+Pay invoice and check unit price of Move event and Lot cost price is updated::
+
+    >>> config.user = account_user.id
+    >>> pay = Wizard('account.invoice.pay', [invoice])
+    >>> pay.form.journal = cash_journal
+    >>> pay.execute('choice')
+    >>> invoice.reload()
+    >>> invoice.state
+    u'paid'
+    >>> config.user = farm_user.id
+    >>> move_event = MoveEvent(move_event.id)
+    >>> move_event.unit_price
+    Decimal('450.00')
+    >>> animal_group.reload()
+    >>> animal_group.lot.cost_price
+    Decimal('450.00')

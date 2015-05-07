@@ -9,23 +9,17 @@ from trytond.tests.test_tryton import doctest_setup, doctest_teardown
 
 
 class TestCase(unittest.TestCase):
-    '''
-    Test module.
-    '''
+    'Test module'
 
     def setUp(self):
         trytond.tests.test_tryton.install_module('sale_farm')
 
     def test0005views(self):
-        '''
-        Test views.
-        '''
+        'Test views'
         test_view('sale_farm')
 
     def test0006depends(self):
-        '''
-        Test depends.
-        '''
+        'Test depends'
         test_depends()
 
 
