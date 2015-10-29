@@ -292,7 +292,8 @@ class SaleLine:
             for il in self.invoice_lines if il.invoice.paid)
         delivered_animals = sum(e.quantity for e in self.move_events
             if e.state == 'validated')
-        unit_price = invoice_amount / delivered_animals
+        unit_price = self.sale.currency.round(invoice_amount
+            / delivered_animals)
 
         category_id = ModelData.get_id('sale_farm', 'cost_category_sale_price')
         lot = self.animal.lot
@@ -307,7 +308,8 @@ class SaleLine:
                 cost_line.lot = lot
                 cost_line.category = category_id
                 cost_line.origin = str(event)
-                cost_line.unit_price = (unit_price - lot.cost_price
+                cost_line.unit_price = self.sale.currency.round(
+                    unit_price - lot.cost_price
                     if lot.cost_price else unit_price)
                 cost_line.save()
 
