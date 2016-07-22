@@ -157,21 +157,17 @@ class SaleLine:
     def on_change_animal(self):
         Animal = Pool().get('farm.animal')
 
-        res = {
-            'animal_location': None,
-            'animal_quantity': None,
-            }
+        self.animal_location = None
+        self.animal_quantity = None
         if (not self.type or self.type != 'line' or not self.animal or
                 self.animal.id < 0):
-            return res
+            return
 
         analytic_accounts = None
         if isinstance(self.animal, Animal):
-            res = {
-                'animal_location': (self.animal.location.id
-                    if self.animal.location else None),
-                'animal_quantity': 1,
-                }
+            self.animal_location = (self.animal.location
+                if self.animal.location else None)
+            self.animal_quantity = 1
             if hasattr(self.animal.location, 'analytic_accounts'):
                 analytic_accounts = self.animal.location.analytic_accounts
         elif len(self.animal.locations) == 1:
@@ -180,18 +176,16 @@ class SaleLine:
                     locations=[group_location.id],
                     stock_date_end=(self.sale.sale_date
                         if self.sale and self.sale.sale_date else None)):
-                res = {
-                    'animal_location': group_location.id,
-                    'animal_quantity': self.animal.quantity or None,
-                    }
+                self.animal_location = group_location
+                self.animal_quantity = self.animal.quantity or None
                 if hasattr(group_location, 'analytic_accounts'):
                     analytic_accounts = group_location.analytic_accounts
 
-        if (res['animal_location'] and hasattr(self, 'analytic_accounts') and
+        if (self.animal_location and hasattr(self, 'analytic_accounts') and
                 analytic_accounts):
             for account in analytic_accounts.accounts:
-                res['analytic_account_%s' % account.root.id] = account.id
-        return res
+                setattr(self, 'analytic_account_%s' % account.root.id,
+                    account.id)
 
     @fields.depends('type', 'animal')
     def on_change_with_animal_type(self, name=None):
@@ -205,21 +199,18 @@ class SaleLine:
     @fields.depends('animal', 'animal_location', '_parent_sale.sale_date')
     def on_change_animal_location(self):
         if not self.animal or not self.animal_location:
-            return {
-                'animal_quantity': None,
-                }
+            self.animal_quantity = None
+            return
         with Transaction().set_context(
                 locations=[self.animal_location.id],
                 stock_date_end=(self.sale.sale_date
                     if self.sale and self.sale.sale_date else None)):
-            res = {
-                'animal_quantity': self.animal.lot.quantity or None,
-                }
+            self.animal_quantity = self.animal.lot.quantity or None
         if (hasattr(self, 'analytic_accounts') and
                 self.animal_location.analytic_accounts):
             for account in self.animal_location.analytic_accounts.accounts:
-                res['analytic_account_%s' % account.root.id] = account.id
-        return res
+                setattr(self, 'analytic_account_%s' % account.root.id,
+                    account.id)
 
     @property
     def move_event_done(self):
