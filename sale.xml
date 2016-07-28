@@ -36,7 +36,7 @@
             <field name="name">Animal's Moves</field>
             <field name="res_model">farm.move.event</field>
             <field name="domain"
-                eval="[("origin.sale.id", "in", Eval('active_ids'), 'sale.line')]"
+                eval="[('origin.sale.id', 'in', Eval('active_ids'), 'sale.line')]"
                 pyson="1"/>
         </record>
         <record model="ir.action.keyword"
