@@ -265,8 +265,8 @@ class SaleLine:
             move_event.animal_group = self.animal
         else:
             move_event.animal = self.animal
-        move_event.timestamp = datetime.combine(self.delivery_date,
-            datetime.now().time()) if self.delivery_date else datetime.now()
+        move_event.timestamp = datetime.combine(self.shipping_date,
+            datetime.now().time()) if self.shipping_date else datetime.now()
         move_event.from_location = self.animal_location
         move_event.to_location = self.sale.party.customer_location
         move_event.quantity = self.animal_quantity
