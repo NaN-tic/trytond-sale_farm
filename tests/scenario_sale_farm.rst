@@ -9,66 +9,24 @@ Imports::
     >>> from decimal import Decimal
     >>> from operator import attrgetter
     >>> from proteus import config, Model, Wizard
+    >>> from trytond.tests.tools import activate_modules
     >>> from trytond.modules.company.tests.tools import create_company, \
     ...     get_company
     >>> from trytond.modules.account.tests.tools import create_fiscalyear, \
-    ...     create_chart, get_accounts, create_tax, set_tax_code
+    ...     create_chart, get_accounts, create_tax, create_tax_code
     >>> from trytond.modules.account_invoice.tests.tools import \
     ...     set_fiscalyear_invoice_sequences, create_payment_term
+    >>> from trytond.modules.farm.tests.tools import create_specie, create_users
     >>> today = datetime.date.today()
 
-Create database::
+Install account_invoice::
 
-    >>> config = config.set_trytond()
-    >>> config.pool.test = True
-
-Install sale_farm::
-
-    >>> Module = Model.get('ir.module')
-    >>> sale_module, = Module.find([('name', '=', 'sale_farm')])
-    >>> Module.install([sale_module.id], config.context)
-    >>> Wizard('ir.module.install_upgrade').execute('upgrade')
+    >>> config = activate_modules('sale_farm')
 
 Create company::
 
     >>> _ = create_company()
     >>> company = get_company()
-
-Reload the context::
-
-    >>> User = Model.get('res.user')
-    >>> Group = Model.get('res.group')
-    >>> config._context = User.get_preferences(True, config.context)
-
-Create sale user::
-
-    >>> sale_user = User()
-    >>> sale_user.name = 'Sale'
-    >>> sale_user.login = 'sale'
-    >>> sale_user.main_company = company
-    >>> for group in Group.find([('name', 'in', ['Sales', 'Farm'])]):
-    ...     sale_user.groups.append(group)
-    >>> sale_user.save()
-
-Create stock user::
-
-    >>> farm_user = User()
-    >>> farm_user.name = 'Stock'
-    >>> farm_user.login = 'stock'
-    >>> farm_user.main_company = company
-    >>> for group in Group.find([('name', 'in', ['Farm', 'Farm / Groups'])]):
-    ...     farm_user.groups.append(group)
-    >>> farm_user.save()
-
-Create account user::
-
-    >>> account_user = User()
-    >>> account_user.name = 'Account'
-    >>> account_user.login = 'account'
-    >>> account_user.main_company = company
-    >>> account_group, = Group.find([('name', '=', 'Account')])
-    >>> account_user.groups.append(account_group)
-    >>> account_user.save()
 
 Create fiscal year::
 
@@ -101,6 +59,28 @@ Create parties::
     >>> customer = Party(name='Customer')
     >>> customer.save()
 
+Create account category::
+
+    >>> ProductCategory = Model.get('product.category')
+    >>> account_category = ProductCategory(name="Account Category")
+    >>> account_category.accounting = True
+    >>> account_category.account_expense = expense
+    >>> account_category.account_revenue = revenue
+    >>> account_category.save()
+
+Create payment method::
+
+    >>> Journal = Model.get('account.journal')
+    >>> PaymentMethod = Model.get('account.invoice.payment.method')
+    >>> Sequence = Model.get('ir.sequence')
+    >>> journal_cash, = Journal.find([('type', '=', 'cash')])
+    >>> payment_method = PaymentMethod()
+    >>> payment_method.name = 'Cash'
+    >>> payment_method.journal = journal_cash
+    >>> payment_method.credit_account = account_cash
+    >>> payment_method.debit_account = account_cash
+    >>> payment_method.save()
+
 Create products::
 
     >>> ProductUom = Model.get('product.uom')
@@ -108,28 +88,18 @@ Create products::
     >>> kg, = ProductUom.find([('name', '=', 'Kilogram')])
     >>> ProductTemplate = Model.get('product.template')
     >>> Product = Model.get('product.product')
-    >>> group_template = ProductTemplate(
-    ...     name='Group of Pig',
-    ...     default_uom=unit,
-    ...     type='goods',
-    ...     list_price=Decimal('100'),
-    ...     cost_price=Decimal('30'))
-    >>> group_template.save()
-    >>> group_product = Product(template=group_template)
-    >>> group_product.save()
     >>> meet_template = ProductTemplate()
     >>> meet_template.name = 'Meet'
     >>> meet_template.default_uom = unit
     >>> meet_template.type = 'service'
     >>> meet_template.salable = True
     >>> meet_template.list_price = Decimal('3.0')
-    >>> meet_template.cost_price = Decimal('0.5')
     >>> meet_template.cost_price_method = 'fixed'
-    >>> meet_template.account_expense = expense
-    >>> meet_template.account_revenue = revenue
+    >>> meet_template.account_category = account_category
     >>> meet_template.save()
     >>> meet_product = Product()
-    >>> meet_product.template = meet_template
+    >>> meet_product, = meet_template.products
+    >>> meet_product.cost_price = Decimal('0.5')
     >>> meet_product.save()
 
 Create payment term::
@@ -137,74 +107,67 @@ Create payment term::
     >>> payment_term = create_payment_term()
     >>> payment_term.save()
 
-Create sequence::
-
-    >>> Sequence = Model.get('ir.sequence')
-    >>> event_order_sequence = Sequence(
-    ...     name='Event Order Pig Warehouse 1',
-    ...     code='farm.event.order',
-    ...     padding=4)
-    >>> event_order_sequence.save()
-    >>> group_sequence = Sequence(
-    ...     name='Groups Pig Warehouse 1',
-    ...     code='farm.animal.group',
-    ...     padding=4)
-    >>> group_sequence.save()
-
 Create specie::
 
-    >>> Location = Model.get('stock.location')
-    >>> lost_found_location, = Location.find([('type', '=', 'lost_found')])
-    >>> warehouse, = Location.find([('type', '=', 'warehouse')])
-    >>> Specie = Model.get('farm.specie')
-    >>> SpecieBreed = Model.get('farm.specie.breed')
-    >>> SpecieFarmLine = Model.get('farm.specie.farm_line')
-    >>> pigs_specie = Specie(
-    ...     name='Pigs',
-    ...     male_enabled=False,
-    ...     female_enabled=False,
-    ...     individual_enabled=False,
-    ...     group_enabled=True,
-    ...     group_product=group_product,
-    ...     removed_location=lost_found_location,
-    ...     foster_location=lost_found_location,
-    ...     lost_found_location=lost_found_location,
-    ...     feed_lost_found_location=lost_found_location)
-    >>> pigs_specie.save()
-    >>> pigs_breed = SpecieBreed(
-    ...     specie=pigs_specie,
-    ...     name='Holland')
-    >>> pigs_breed.save()
-    >>> pigs_farm_line = SpecieFarmLine(
-    ...     specie=pigs_specie,
-    ...     farm=warehouse,
-    ...     event_order_sequence=event_order_sequence,
-    ...     has_group=True,
-    ...     group_sequence=group_sequence)
-    >>> pigs_farm_line.save()
+    >>> specie, breed, products = create_specie('Pig')
+    >>> individual_product = products['individual']
+    >>> group_product = products['group']
+    >>> female_product = products['female']
+    >>> male_product = products['male']
+    >>> semen_product = products['semen']
+
+Create farm users::
+
+    >>> users = create_users(company)
+    >>> individual_user = users['individual']
+    >>> group_user = users['group']
+    >>> female_user = users['female']
+    >>> male_user = users['male']
 
 Create farm locations::
 
-    >>> location_id, = Location.create([{
-    ...         'name': 'Location 1',
-    ...         'code': 'L1',
-    ...         'type': 'storage',
-    ...         'parent': warehouse.storage_location.id,
-    ...         }], config.context)
+    >>> Location = Model.get('stock.location')
+    >>> warehouse, = Location.find([('type', '=', 'warehouse')])
+    >>> location = Location()
+    >>> location.name = 'Location 1'
+    >>> location.code = 'L1'
+    >>> location.type = 'storage'
+    >>> location.parent = warehouse.storage_location
+    >>> location.save()
 
+Create sale user::
+
+    >>> Group = Model.get('res.group')
+    >>> User = Model.get('res.user')
+    >>> sale_user = User()
+    >>> sale_user.name = 'Sale'
+    >>> sale_user.login = 'sale'
+    >>> sale_user.main_company = company
+    >>> for group in Group.find([('name', 'in', ['Sales', 'Farm'])]):
+    ...     sale_user.groups.append(group)
+    >>> sale_user.save()
+
+Create account user::
+
+    >>> account_user = User()
+    >>> account_user.name = 'Account'
+    >>> account_user.login = 'account'
+    >>> account_user.main_company = company
+    >>> account_group, = Group.find([('name', '=', 'Account')])
+    >>> account_user.groups.append(account_group)
+    >>> account_user.save()
 
 Create group::
 
     >>> AnimalGroup = Model.get('farm.animal.group')
-    >>> animal_group = AnimalGroup(
-    ...     specie=pigs_specie,
-    ...     breed=pigs_breed,
-    ...     initial_location=location_id,
-    ...     initial_quantity=40)
+    >>> animal_group = AnimalGroup()
+    >>> animal_group.specie = specie
+    >>> animal_group.breed = breed
+    >>> animal_group.initial_location = location
+    >>> animal_group.initial_quantity = 40
     >>> animal_group.save()
-    >>> unused = config.set_context({
-    ...         'locations': [location_id]})
-    >>> animal_group.reload()
+    >>> config._context['locations'] = [location.id]
+    >>> animal_group = AnimalGroup(animal_group.id)
     >>> animal_group.lot.quantity
     40.0
 
@@ -223,36 +186,36 @@ Sale 15 animals::
     >>> sale_line.quantity = 2250.0
     >>> sale_line.animal = animal_group
     >>> sale_line.animal_quantity = 15
+    >>> sale.save()
     >>> sale.click('quote')
     >>> sale.click('confirm')
-    >>> sale.click('process')
     >>> sale.state
-    u'processing'
+    'processing'
     >>> sale.reload()
     >>> len(sale.lines[0].move_events), len(sale.invoices)
     (1, 1)
     >>> invoice, = sale.invoices
     >>> move_event, = sale.lines[0].move_events
     >>> sale.shipment_state
-    u'waiting'
+    'waiting'
 
 
 Send animals to customer (validate move events) and check Sale's shipment
 state::
 
-    >>> config.user = farm_user.id
+    >>> config.user = group_user.id
     >>> MoveEvent = Model.get('farm.move.event')
     >>> move_event = MoveEvent(move_event.id)
     >>> move_event.weight = Decimal('2365.0')
     >>> move_event.save()
-    >>> MoveEvent.validate_event([move_event.id], config.context)
+    >>> move_event.click('validate_event')
     >>> move_event.reload()
     >>> move_event.unit_price
     Decimal('0.0')
     >>> config.user = sale_user.id
     >>> sale.reload()
     >>> sale.shipment_state
-    u'sent'
+    'sent'
     >>> invoice, = sale.invoices
 
 Post invoice::
@@ -261,7 +224,6 @@ Post invoice::
     >>> Invoice = Model.get('account.invoice')
     >>> invoice = Invoice(invoice.id)
     >>> invoice.click('post')
-    >>> Invoice.post([invoice.id], config.context)
     >>> config.user = sale_user.id
     >>> sale.reload()
     >>> len(sale.shipments), len(sale.shipment_returns), len(sale.invoices)
@@ -271,12 +233,12 @@ Pay invoice and check unit price of Move event and Lot cost price is updated::
 
     >>> config.user = account_user.id
     >>> pay = Wizard('account.invoice.pay', [invoice])
-    >>> pay.form.journal = cash_journal
+    >>> pay.form.payment_method = payment_method
     >>> pay.execute('choice')
     >>> invoice.reload()
     >>> invoice.state
-    u'paid'
-    >>> config.user = farm_user.id
+    'paid'
+    >>> config.user = group_user.id
     >>> move_event = MoveEvent(move_event.id)
     >>> move_event.unit_price
     Decimal('450.00')

@@ -7,25 +7,17 @@ from trytond.model import fields
 from trytond.pool import Pool, PoolMeta
 from trytond.pyson import Bool, Eval, Id, Not, Or
 from trytond.transaction import Transaction
+from trytond.exceptions import UserError
+from trytond.i18n import gettext
 
 __all__ = ['MoveEvent', 'Sale', 'SaleLine']
-__metaclass__ = PoolMeta
 
 
-class MoveEvent:
+class MoveEvent(metaclass=PoolMeta):
     __name__ = 'farm.move.event'
 
     origin = fields.Reference('Origin', selection='get_origin', readonly=True,
         select=True)
-
-    @classmethod
-    def __setup__(cls):
-        super(MoveEvent, cls).__setup__()
-        cls._error_messages.update({
-                'weight_required_in_sale_move_event': (
-                    'The weigth in the Move Event "%s" is required because it '
-                    'is a move of a sale.'),
-                })
 
     @classmethod
     def _get_origin(cls):
@@ -51,8 +43,9 @@ class MoveEvent:
         for event in events:
             if event.origin and isinstance(event.origin, SaleLine):
                 if not event.weight:
-                    cls.raise_user_error('weight_required_in_sale_move_event',
-                        (event.rec_name,))
+                    raise UserError(gettext(
+                            'sale_farm.msg_weight_required_in_sale_move_event',
+                            event=event.rec_name))
                 sales_to_process.add(event.origin.sale.id)
         user_farms = Transaction().context.get('farms')
         with Transaction().set_user(0, set_context=True), \
@@ -62,12 +55,11 @@ class MoveEvent:
                     Sale.process(Sale.browse(list(sales_to_process)))
 
 
-class Sale:
+class Sale(metaclass=PoolMeta):
     __name__ = 'sale.sale'
 
-    move_events = fields.Function(fields.One2Many('farm.move.event', None,
-            "Animal's Moves"),
-        'get_move_events')
+    move_events = fields.Function(fields.Many2Many('farm.move.event', None,
+            None, "Animal's Moves"), 'get_move_events')
 
     def get_move_events(self, name):
         return [m.id for l in self.lines for m in l.move_events]
@@ -105,7 +97,7 @@ class Sale:
         return res
 
 
-class SaleLine:
+class SaleLine(metaclass=PoolMeta):
     __name__ = 'sale.line'
 
     animal = fields.Reference('Animal', selection='get_animal_models', states={
@@ -155,7 +147,7 @@ class SaleLine:
                 ])
         return [('', '')] + [(m.model, m.name) for m in models]
 
-    @fields.depends('type', 'animal', '_parent_sale.sale_date')
+    @fields.depends('type', 'animal', 'sale', '_parent_sale.sale_date')
     def on_change_animal(self):
         Animal = Pool().get('farm.animal')
 
@@ -198,7 +190,8 @@ class SaleLine:
             return self.animal.type
         return 'group'
 
-    @fields.depends('animal', 'animal_location', '_parent_sale.sale_date')
+    @fields.depends('animal', 'animal_location', 'sale',
+        '_parent_sale.sale_date')
     def on_change_animal_location(self):
         if not self.animal or not self.animal_location:
             self.animal_quantity = None
@@ -253,10 +246,10 @@ class SaleLine:
             return
 
         if not self.sale.party.customer_location:
-            self.raise_user_error('customer_location_required', {
-                    'sale': self.sale.rec_name,
-                    'line': self.rec_name,
-                    })
+            raise UserError(gettext('sale.msg_sale_customer_location_required',
+                    sale=self.sale.rec_name,
+                    line=self.rec_name,
+                    ))
 
         with Transaction().set_user(0, set_context=True):
             move_event = MoveEvent()
@@ -312,5 +305,5 @@ class SaleLine:
             default = {}
         else:
             default = default.copy()
-        default['move_events'] = None
+        default.setdefault('move_events', None)
         return super(SaleLine, cls).copy(lines, default=default)

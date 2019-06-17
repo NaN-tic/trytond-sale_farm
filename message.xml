@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<tryton>
+    <data group="1">
+        <record model="ir.message" id="msg_weight_required_in_sale_move_event">
+            <field name="text">The weigth in the Move Event "%(event)s" is required because it is a move of a sale.</field>
+        </record>
+    </data>
+</tryton>
