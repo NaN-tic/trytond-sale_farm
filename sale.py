@@ -239,7 +239,7 @@ class SaleLine(metaclass=PoolMeta):
 
         quantity = self.animal_quantity
         for event in self.move_events:
-            if event.state != 'cancel':
+            if event.state != 'cancelled':
                 quantity -= event.quantity
         if (self.animal_quantity > 0 and quantity <= 0 or
                 self.animal_quantity < 0 and quantity >= 0):
