@@ -10,8 +10,6 @@ from trytond.transaction import Transaction
 from trytond.exceptions import UserError
 from trytond.i18n import gettext
 
-__all__ = ['MoveEvent', 'Sale', 'SaleLine']
-
 
 class MoveEvent(metaclass=PoolMeta):
     __name__ = 'farm.move.event'
@@ -85,15 +83,20 @@ class Sale(metaclass=PoolMeta):
                 line.set_move_event_unit_price()
 
     def create_shipment(self, shipment_type):
+        pool = Pool()
+        MoveEvent = pool.get('farm.move.event')
+
         res = super(Sale, self).create_shipment(shipment_type)
 
         if self.shipment_method == 'manual':
             return res
 
+        to_save = []
         for line in self.lines:
             move_event = line.get_move_event(shipment_type)
             if move_event:
-                move_event.save()
+                to_save.append(move_event)
+        MoveEvent.save(to_save)
         return res
 
 
