@@ -14,8 +14,7 @@ from trytond.i18n import gettext
 class MoveEvent(metaclass=PoolMeta):
     __name__ = 'farm.move.event'
 
-    origin = fields.Reference('Origin', selection='get_origin', readonly=True,
-        select=True)
+    origin = fields.Reference('Origin', selection='get_origin', readonly=True)
 
     @classmethod
     def _get_origin(cls):
