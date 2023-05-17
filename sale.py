@@ -272,10 +272,6 @@ class SaleLine(metaclass=PoolMeta):
         return move_event
 
     def set_move_event_unit_price(self):
-        pool = Pool()
-        ModelData = pool.get('ir.model.data')
-        LotCostLine = pool.get('stock.lot.cost_line')
-
         invoice_amount = sum(il.on_change_with_amount()
             for il in self.invoice_lines if il.invoice.paid)
         delivered_animals = sum(e.quantity for e in self.move_events
@@ -283,23 +279,11 @@ class SaleLine(metaclass=PoolMeta):
         unit_price = self.sale.currency.round(invoice_amount
             / delivered_animals)
 
-        category_id = ModelData.get_id('sale_farm', 'cost_category_sale_price')
-        lot = self.animal.lot
         for event in self.move_events:
             if event.state != 'validated':
                 continue
             event.unit_price = unit_price
             event.save()
-
-            if lot.cost_price != unit_price:
-                cost_line = LotCostLine()
-                cost_line.lot = lot
-                cost_line.category = category_id
-                cost_line.origin = str(event)
-                cost_line.unit_price = self.sale.currency.round(
-                    unit_price - lot.cost_price
-                    if lot.cost_price else unit_price)
-                cost_line.save()
 
     @classmethod
     def copy(cls, lines, default=None):

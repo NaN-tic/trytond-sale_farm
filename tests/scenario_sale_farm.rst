@@ -238,4 +238,6 @@ Pay invoice and check unit price of Move event and Lot cost price is updated::
     Decimal('450.00')
     >>> animal_group.reload()
     >>> animal_group.lot.cost_price
-    Decimal('450.00')
+    Decimal('20.0000')
+    >>> animal_group.lot.total_cost
+    Decimal('500.0000')
