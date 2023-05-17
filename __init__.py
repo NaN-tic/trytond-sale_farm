@@ -2,6 +2,7 @@
 # copyright notices and license terms.
 from trytond.pool import Pool
 from . import sale
+from . import analytic_sale
 
 def register():
     Pool.register(
@@ -9,3 +10,7 @@ def register():
         sale.Sale,
         sale.SaleLine,
         module='sale_farm', type_='model')
+
+    Pool.register(
+        analytic_sale.SaleLine,
+        module='sale_farm', type_='model', depends=['analytic_sale'])

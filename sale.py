@@ -133,13 +133,6 @@ class SaleLine(metaclass=PoolMeta):
         "Animal's Moves", readonly=True)
 
     @classmethod
-    def __setup__(cls):
-        super(SaleLine, cls).__setup__()
-        if hasattr(cls, 'analytic_accounts'):
-            cls.animal.on_change.add('analytic_accounts')
-            cls.animal_location.on_change.add('analytic_accounts')
-
-    @classmethod
     def get_animal_models(cls):
         IrModel = Pool().get('ir.model')
         models = IrModel.search([
