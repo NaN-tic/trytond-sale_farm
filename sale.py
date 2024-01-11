@@ -107,7 +107,7 @@ class SaleLine(metaclass=PoolMeta):
                 Not(Eval('context', {}).get('groups', []).contains(
                     Id('farm', 'group_farm')))),
             'readonly': ~Eval('_parent_sale', {}),
-            }, depends=['type'])
+            })
     animal_type = fields.Function(fields.Selection([
             (None, ''),
             ('male', 'Male'),
@@ -123,11 +123,11 @@ class SaleLine(metaclass=PoolMeta):
             'invisible': ~Bool(Eval('animal_type')),
             'required': Bool(Eval('animal_type')),
             'readonly': Eval('animal_type', '') != 'group',
-            }, depends=['animal_type'])
+            })
     animal_quantity = fields.Integer('Animal Quantity', states={
             'invisible': Eval('animal_type', '') != 'group',
             'required': Eval('animal_type', '') == 'group',
-            }, depends=['animal_type'])
+            })
     move_events = fields.One2Many('farm.move.event', 'origin',
         "Animal's Moves", readonly=True)
 
