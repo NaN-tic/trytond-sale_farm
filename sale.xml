@@ -17,7 +17,7 @@
         </record>
 
         <record model="ir.model.access" id="access_move_event_sale">
-            <field name="model" search="[('model', '=', 'farm.move.event')]"/>
+            <field name="model">farm.move.event</field>
             <field name="group" ref="sale.group_sale"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -47,7 +47,7 @@
         </record>
 
         <record model="ir.model.access" id="access_sale_farm">
-            <field name="model" search="[('model', '=', 'sale.sale')]"/>
+            <field name="model">sale.sale</field>
             <field name="group" ref="farm.group_farm"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -75,7 +75,7 @@
         </record>
 
         <record model="ir.model.access" id="access_sale_line_farm">
-            <field name="model" search="[('model', '=', 'sale.line')]"/>
+            <field name="model">sale.line</field>
             <field name="group" ref="farm.group_farm"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
