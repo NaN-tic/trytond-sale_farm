@@ -260,7 +260,7 @@ class SaleLine(metaclass=PoolMeta):
         move_event.from_location = self.animal_location
         move_event.to_location = self.sale.party.customer_location
         move_event.quantity = self.animal_quantity
-        move_event.unit_price = Decimal('0.0')
+        move_event.unit_price = Decimal(0)
         move_event.origin = self
         return move_event
 
