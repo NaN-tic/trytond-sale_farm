@@ -204,8 +204,8 @@ state::
     >>> move_event.save()
     >>> move_event.click('validate_event')
     >>> move_event.reload()
-    >>> move_event.unit_price
-    Decimal('0.0')
+    >>> move_event.unit_price == Decimal('0.0')
+    True
     >>> config.user = sale_user.id
     >>> sale.reload()
     >>> sale.shipment_state
