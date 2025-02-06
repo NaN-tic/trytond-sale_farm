@@ -27,7 +27,7 @@ class MoveEvent(metaclass=PoolMeta):
         Model = pool.get('ir.model')
         models = cls._get_origin()
         models = Model.search([
-                ('model', 'in', models),
+                ('name', 'in', models),
                 ])
         return [('', '')] + [(m.model, m.name) for m in models]
 
@@ -135,7 +135,7 @@ class SaleLine(metaclass=PoolMeta):
     def get_animal_models(cls):
         IrModel = Pool().get('ir.model')
         models = IrModel.search([
-                ('model', 'in', [
+                ('name', 'in', [
                         'farm.animal',
                         'farm.animal.group',
                         ]),
