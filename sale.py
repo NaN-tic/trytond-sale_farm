@@ -29,7 +29,7 @@ class MoveEvent(metaclass=PoolMeta):
         models = Model.search([
                 ('name', 'in', models),
                 ])
-        return [('', '')] + [(m.model, m.name) for m in models]
+        return [('', '')] + [(m.name, m.string) for m in models]
 
     @classmethod
     def validate_event(cls, events):
@@ -140,7 +140,7 @@ class SaleLine(metaclass=PoolMeta):
                         'farm.animal.group',
                         ]),
                 ])
-        return [('', '')] + [(m.model, m.name) for m in models]
+        return [('', '')] + [(m.name, m.string) for m in models]
 
     @fields.depends('type', 'animal', 'sale', '_parent_sale.sale_date')
     def on_change_animal(self):
