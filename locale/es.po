@@ -1,14 +1,6 @@
-# 
+#
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
-
-msgctxt "error:farm.move.event:"
-msgid ""
-"The weigth in the Move Event \"%s\" is required because it is a move of a "
-"sale."
-msgstr ""
-"El peso en el movimiento \"%s\" es obligatorio ya que se trata de un "
-"movimiento de venta."
 
 msgctxt "field:farm.move.event,origin:"
 msgid "Origin"
